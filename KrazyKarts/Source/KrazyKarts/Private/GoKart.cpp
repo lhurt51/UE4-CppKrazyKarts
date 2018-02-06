@@ -25,6 +25,12 @@ void AGoKart::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	FVector Force = GetActorForwardVector() * MaxDrivingForce * Throttle;
+	// a = F / m
+	FVector Acceleration = Force / Mass;
+	// dv = a * dt
+	Velocity += Acceleration * DeltaTime;
+
 	// MPS * 100 = CMPS * S = Velocity in CM.
 	FVector Translation = Velocity * 100 * DeltaTime;
 
@@ -36,7 +42,7 @@ void AGoKart::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	// Set up gameplay key bindings
+	// Set up game play key bindings
 	check(PlayerInputComponent);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGoKart::MoveForward);
@@ -45,6 +51,6 @@ void AGoKart::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AGoKart::MoveForward(float Value)
 {
 	// Direction of the car * speed of car in MPS * the value of the throttle
-	Velocity = GetActorForwardVector() * 20 * Value;
+	Throttle = Value;
 }
 
