@@ -2,6 +2,8 @@
 
 #include "GoKart.h"
 
+#include "Components/InputComponent.h"
+
 
 // Sets default values
 AGoKart::AGoKart()
@@ -23,6 +25,10 @@ void AGoKart::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// MPS * 100 = CMPS * S = Velocity in CM.
+	FVector Translation = Velocity * 100 * DeltaTime;
+
+	AddActorWorldOffset(Translation);
 }
 
 // Called to bind functionality to input
@@ -30,5 +36,15 @@ void AGoKart::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	// Set up gameplay key bindings
+	check(PlayerInputComponent);
+
+	PlayerInputComponent->BindAxis("MoveForward", this, &AGoKart::MoveForward);
+}
+
+void AGoKart::MoveForward(float Value)
+{
+	// Direction of the car * speed of car in MPS * the value of the throttle
+	Velocity = GetActorForwardVector() * 20 * Value;
 }
 
