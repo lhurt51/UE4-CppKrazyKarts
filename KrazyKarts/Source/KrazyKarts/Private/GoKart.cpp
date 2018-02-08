@@ -80,9 +80,9 @@ FVector AGoKart::GetRollingResistance()
 
 void AGoKart::ApplyRotation(float DeltaTime)
 {
-	// (MaxDeg * DeltaTime = Angle we can mover per frame) * steeringthrow 
-	float RotationAngle = MaxDegPerSec * DeltaTime * SteeringThrow;
-	FQuat RotationDelta(GetActorUpVector(), FMath::DegreesToRadians(RotationAngle));
+	float DeltaLocation = FVector::DotProduct(GetActorForwardVector(), Velocity) * DeltaTime;
+	float RotationAngle = DeltaLocation / MinTurningRadius * SteeringThrow;
+	FQuat RotationDelta(GetActorUpVector(), RotationAngle);
 
 	// Rotating our velocity as we rotate the car
 	Velocity = RotationDelta.RotateVector(Velocity);
