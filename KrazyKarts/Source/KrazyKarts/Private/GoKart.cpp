@@ -26,6 +26,8 @@ void AGoKart::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	FVector Force = GetActorForwardVector() * MaxDrivingForce * Throttle;
+	// Applying the air drag to the Force
+	Force += GetResistance();
 	// a = F / m
 	FVector Acceleration = Force / Mass;
 	// dv = a * dt
@@ -58,6 +60,11 @@ void AGoKart::MoveRight(float Value)
 {
 	// Right vector of the car * speed of steering in Deg/s
 	SteeringThrow = Value;
+}
+
+FVector AGoKart::GetResistance()
+{
+	return -Velocity.GetSafeNormal() * Velocity.SizeSquared() * DragCoef;
 }
 
 void AGoKart::ApplyRotation(float DeltaTime)
