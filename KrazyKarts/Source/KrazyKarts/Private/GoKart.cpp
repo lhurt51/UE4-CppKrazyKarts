@@ -31,10 +31,7 @@ void AGoKart::Tick(float DeltaTime)
 	// dv = a * dt
 	Velocity += Acceleration * DeltaTime;
 
-	// MPS * 100 = CMPS * S = Velocity in CM.
-	FVector Translation = Velocity * 100 * DeltaTime;
-
-	AddActorWorldOffset(Translation);
+	UpdateLocationFromVelocity(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -52,5 +49,15 @@ void AGoKart::MoveForward(float Value)
 {
 	// Direction of the car * speed of car in MPS * the value of the throttle
 	Throttle = Value;
+}
+
+void AGoKart::UpdateLocationFromVelocity(float DeltaTime)
+{
+	FHitResult Hit;
+	// MPS * 100 = CMPS * S = Velocity in CM.
+	FVector Translation = Velocity * 100 * DeltaTime;
+
+	AddActorWorldOffset(Translation, true, &Hit);
+	if (Hit.IsValidBlockingHit()) Velocity = FVector::ZeroVector;
 }
 

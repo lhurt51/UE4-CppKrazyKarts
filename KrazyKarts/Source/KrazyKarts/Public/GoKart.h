@@ -40,5 +40,7 @@ private:
 	float Throttle;
 
 	void MoveForward(float Value);
+
+	void UpdateLocationFromVelocity(float DeltaTime);
 	
 };
