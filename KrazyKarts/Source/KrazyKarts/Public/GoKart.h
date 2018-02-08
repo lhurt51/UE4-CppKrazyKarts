@@ -29,17 +29,27 @@ public:
 private:
 	// The Mass of the car (kg). 1000kg = 1ton
 	UPROPERTY(EditAnywhere)
-	float Mass = 1000;
+	float Mass = 1000.0f;
 
 	// The force applied to the car when the throttle is fully down (N)
 	UPROPERTY(EditAnywhere)
-	float MaxDrivingForce = 10000;
+	float MaxDrivingForce = 10000.0f;
+
+	// The number of degrees rotated per second at full control throw (deg/s)
+	UPROPERTY(EditAnywhere)
+	float MaxDegPerSec = 90.0f;
 
 	FVector Velocity;
 
 	float Throttle;
 
+	float SteeringThrow;
+
 	void MoveForward(float Value);
+
+	void MoveRight(float Value);
+
+	void ApplyRotation(float DeltaTime);
 
 	void UpdateLocationFromVelocity(float DeltaTime);
 	
