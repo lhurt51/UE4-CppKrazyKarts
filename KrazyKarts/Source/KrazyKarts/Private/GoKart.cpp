@@ -49,20 +49,28 @@ void AGoKart::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	// Set up game play key bindings
 	check(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &AGoKart::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AGoKart::MoveRight);
+	PlayerInputComponent->BindAxis("MoveForward", this, &AGoKart::Server_MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AGoKart::Server_MoveRight);
 }
 
-void AGoKart::MoveForward(float Value)
+void AGoKart::Server_MoveForward_Implementation(float Value)
 {
-	// Direction of the car * speed of car in MPS * the value of the throttle
 	Throttle = Value;
 }
 
-void AGoKart::MoveRight(float Value)
+bool AGoKart::Server_MoveForward_Validate(float Value)
 {
-	// Right vector of the car * speed of steering in Deg/s
+	return FMath::Abs(Value) <= 1.0f;
+}
+
+void AGoKart::Server_MoveRight_Implementation(float Value)
+{
 	SteeringThrow = Value;
+}
+
+bool AGoKart::Server_MoveRight_Validate(float Value)
+{
+	return FMath::Abs(Value) <= 1.0f;
 }
 
 FVector AGoKart::GetAirResistance()
