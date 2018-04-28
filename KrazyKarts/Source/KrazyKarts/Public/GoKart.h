@@ -83,17 +83,23 @@ private:
 	UPROPERTY()
 	FVector Velocity;
 
+	UPROPERTY(ReplicatedUsing = OnRep_ServerState)
+	FGoKartState ServerState;
+
 	float Throttle;
 
 	float SteeringThrow;
 
-	UPROPERTY(ReplicatedUsing = OnRep_ServerState)
-	FGoKartState ServerState;
+	TArray<FGoKartMove> UnacknowledgedMoves;
 
 	UFUNCTION()
 	void OnRep_ServerState();
 
 	void SimulateMove(FGoKartMove Move);
+
+	FGoKartMove CreateMove(float DeltaTime);
+
+	void ClearAcknowledgedMoves(FGoKartMove LastMove);
 
 	void MoveForward(float Value);
 
