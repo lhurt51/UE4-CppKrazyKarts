@@ -41,27 +41,63 @@ void UGoKartMovementReplicator::TickComponent(float DeltaTime, ELevelTick TickTy
 	}
 
 	// We are the server and in control of the pawn
-	if (GetOwner()->GetRemoteRole() == ROLE_SimulatedProxy)
-	{
-		UpdateServerState(LastMove);
-	}
+	if (GetOwner()->GetRemoteRole() == ROLE_SimulatedProxy) UpdateServerState(LastMove);
 
-	if (GetOwnerRole() == ROLE_SimulatedProxy) MovementComp->SimulateMove(ServerState.LastMove);
+	if (GetOwnerRole() == ROLE_SimulatedProxy) ClientTick(DeltaTime);
 }
 
 void UGoKartMovementReplicator::OnRep_ServerState()
 {
+	switch (GetOwnerRole())
+	{
+	case ROLE_AutonomousProxy:
+		AutonomousProxy_OnRep_ServerState();
+		break;
+	case ROLE_SimulatedProxy:
+		SimulatedProxy_OnRep_ServerState();
+		break;
+	default:
+		break;
+	}
+}
+
+void UGoKartMovementReplicator::SimulatedProxy_OnRep_ServerState()
+{
+	ClientTimeBetweenLastUpdates = ClientTimeSinceUpdate;
+
+	ClientTimeSinceUpdate = 0;
+
+	ClientStartLocation = GetOwner()->GetActorLocation();
+}
+
+void UGoKartMovementReplicator::AutonomousProxy_OnRep_ServerState()
+{
 	if (MovementComp == nullptr) return;
 
 	GetOwner()->SetActorTransform(ServerState.Transform);
+
 	MovementComp->SetVelocity(ServerState.Velocity);
 
 	ClearAcknowledgedMoves(ServerState.LastMove);
 
-	for (const FGoKartMove& Move : UnacknowledgedMoves)
-	{
-		MovementComp->SimulateMove(Move);
-	}
+	for (const FGoKartMove& Move : UnacknowledgedMoves) MovementComp->SimulateMove(Move);
+}
+
+void UGoKartMovementReplicator::ClientTick(float DeltaTime)
+{
+	ClientTimeSinceUpdate += DeltaTime;
+
+	if (ClientTimeBetweenLastUpdates < KINDA_SMALL_NUMBER) return;
+
+	FVector TargetLocation = ServerState.Transform.GetLocation();
+
+	float LerpRatio = ClientTimeSinceUpdate / ClientTimeBetweenLastUpdates;
+
+	FVector StartLocation = ClientStartLocation;
+
+	FVector NewLocation = FMath::LerpStable(StartLocation, TargetLocation, LerpRatio);
+
+	GetOwner()->SetActorLocation(NewLocation);
 }
 
 void UGoKartMovementReplicator::UpdateServerState(const FGoKartMove& Move)
