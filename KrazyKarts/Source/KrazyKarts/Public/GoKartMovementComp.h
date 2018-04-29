@@ -53,6 +53,8 @@ public:
 
 	void SetSteeringThrow(float Val) { SteeringThrow = Val; };
 
+	FGoKartMove GetLastMove() { return LastMove; };
+
 private:
 	// The Mass of the car (kg). 1000kg = 1ton
 	UPROPERTY(EditAnywhere)
@@ -73,6 +75,8 @@ private:
 	// Higher means more Rolling Resistance.
 	UPROPERTY(EditAnywhere)
 	float RollingResistanceCoef = 0.015;
+
+	FGoKartMove LastMove;
 
 	FVector Velocity;
 

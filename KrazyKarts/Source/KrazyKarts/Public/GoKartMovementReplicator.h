@@ -52,6 +52,8 @@ private:
 	UFUNCTION()
 	void OnRep_ServerState();
 
+	void UpdateServerState(const FGoKartMove& Move);
+
 	void ClearAcknowledgedMoves(FGoKartMove LastMove);
 
 	UFUNCTION(Server, Reliable, WithValidation)

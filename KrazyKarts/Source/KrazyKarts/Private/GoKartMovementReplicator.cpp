@@ -2,7 +2,7 @@
 
 #include "GoKartMovementReplicator.h"
 
-#include "Net/UnrealNetwork.h"
+#include "UnrealNetwork.h"
 
 
 // Sets default values for this component's properties
@@ -21,7 +21,6 @@ void UGoKartMovementReplicator::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
 	MovementComp = GetOwner()->FindComponentByClass<UGoKartMovementComp>();
 }
 
@@ -33,23 +32,18 @@ void UGoKartMovementReplicator::TickComponent(float DeltaTime, ELevelTick TickTy
 
 	if (MovementComp == nullptr) return;
 
+	FGoKartMove LastMove = MovementComp->GetLastMove();
+
 	if (GetOwnerRole() == ROLE_AutonomousProxy)
 	{
-		FGoKartMove Move = MovementComp->CreateMove(DeltaTime);
-
-		MovementComp->SimulateMove(Move);
-
-		UnacknowledgedMoves.Add(Move);
-
-		Server_SendMove(Move);
+		UnacknowledgedMoves.Add(LastMove);
+		Server_SendMove(LastMove);
 	}
 
 	// We are the server and in control of the pawn
-	if (GetOwnerRole() == ROLE_Authority && GetOwner()->GetRemoteRole() == ROLE_SimulatedProxy)
+	if (GetOwner()->GetRemoteRole() == ROLE_SimulatedProxy)
 	{
-		FGoKartMove Move = MovementComp->CreateMove(DeltaTime);
-
-		Server_SendMove(Move);
+		UpdateServerState(LastMove);
 	}
 
 	if (GetOwnerRole() == ROLE_SimulatedProxy) MovementComp->SimulateMove(ServerState.LastMove);
@@ -70,6 +64,13 @@ void UGoKartMovementReplicator::OnRep_ServerState()
 	}
 }
 
+void UGoKartMovementReplicator::UpdateServerState(const FGoKartMove& Move)
+{
+	ServerState.LastMove = Move;
+	ServerState.Transform = GetOwner()->GetActorTransform();
+	ServerState.Velocity = MovementComp->GetVelocity();
+}
+
 void UGoKartMovementReplicator::ClearAcknowledgedMoves(FGoKartMove LastMove)
 {
 	TArray<FGoKartMove> NewMoves;
@@ -88,9 +89,7 @@ void UGoKartMovementReplicator::Server_SendMove_Implementation(FGoKartMove Move)
 
 	MovementComp->SimulateMove(Move);
 
-	ServerState.LastMove = Move;
-	ServerState.Transform = GetOwner()->GetActorTransform();
-	ServerState.Velocity = MovementComp->GetVelocity();
+	UpdateServerState(Move);
 }
 
 bool UGoKartMovementReplicator::Server_SendMove_Validate(FGoKartMove Move)
