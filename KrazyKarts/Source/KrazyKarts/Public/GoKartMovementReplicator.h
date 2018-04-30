@@ -43,14 +43,18 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UGoKartMovementComp* MovementComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USceneComponent* MeshOffsetRoot;
+
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	
 private:
-	UPROPERTY()
-	UGoKartMovementComp* MovementComp;
 
 	UPROPERTY(ReplicatedUsing = OnRep_ServerState)
 	FGoKartState ServerState;
@@ -64,6 +68,9 @@ private:
 	FTransform ClientStartTransform;
 
 	FVector ClientStartVelocity;
+
+	UFUNCTION(BlueprintCallable, Category = "MovementReplicator")
+	void SetMeshOffsetRoot(USceneComponent* Root) { MeshOffsetRoot = Root; };
 
 	UFUNCTION()
 	void OnRep_ServerState();
