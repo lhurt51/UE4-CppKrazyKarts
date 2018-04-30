@@ -69,6 +69,8 @@ private:
 
 	FVector ClientStartVelocity;
 
+	float ClientSimulatedTime;
+
 	UFUNCTION(BlueprintCallable, Category = "MovementReplicator")
 	void SetMeshOffsetRoot(USceneComponent* Root) { MeshOffsetRoot = Root; };
 
